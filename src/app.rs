@@ -9,7 +9,6 @@ pub struct ServerConfig {
     pub port: u16,
     pub dir_name: String,
 }
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ServerStatus {
     Running,
@@ -52,7 +51,8 @@ pub struct App {
     pub selected_item: usize,
     pub tick_count: usize,
     pub current_item: usize,
-    pub menu_mode: usize,
+    pub locate: [usize; 2],
+    pub locate_depth: usize,
     pub menu: Vec<&'static str>,
     pub selected_server_name: String,
 }
@@ -65,7 +65,8 @@ impl App {
             selected_item: 0,
             tick_count: 0,
             current_item: 0,
-            menu_mode: 0,
+            locate: [0, 0],
+            locate_depth: 0,
             menu: vec!["Servers", "Preference"],
             selected_server_name: String::new(),
         }
@@ -89,13 +90,13 @@ impl App {
     }
 
     pub fn next(&mut self) {
-        if !self.servers.is_empty() && self.menu_mode == 0 {
+        if !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
             self.selected_item = (self.selected_item + 1) % self.servers.len();
         }
     }
 
     pub fn previous(&mut self) {
-        if !self.servers.is_empty() && self.menu_mode == 0 {
+        if !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
             if self.selected_item == 0 {
                 self.selected_item = self.servers.len() - 1;
             } else {
@@ -106,6 +107,7 @@ impl App {
 
     pub fn next_menu(&mut self) {
         self.current_item = (self.current_item + 1) % self.menu.len();
+        self.selected_item = 0;
     }
 
     pub fn previous_menu(&mut self) {
@@ -114,19 +116,20 @@ impl App {
         } else {
             self.current_item -= 1;
         }
+        self.selected_item = 0
     }
 
     pub fn forward(&mut self) {
-        if self.current_item == 0 && !self.servers.is_empty() && self.menu_mode == 0 {
+        if self.current_item == 0 && !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
             self.selected_server_name = self.servers[self.selected_item].name.to_string();
             let _ = self.save_config();
-            self.menu_mode = 1;
+            self.locate[self.locate_depth] = 1;
             self.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
         }
     }
     pub fn back(&mut self) {
-        if self.menu_mode == 1 {
-            self.menu_mode = 0;
+        if self.locate[self.locate_depth] == 1 {
+            self.locate[self.locate_depth] = 0;
             self.menu = vec!["Servers", "Preference"];
         }
     }

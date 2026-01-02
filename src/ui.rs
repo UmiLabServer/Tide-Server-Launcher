@@ -47,7 +47,7 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     f.render_widget(menu, main_chunks[0]);
 
-    match (app.menu_mode, app.current_item) {
+    match (app.locate[app.locate_depth], app.current_item) {
         // menu wo sewigyo
         (0, 0) => MainRender::servers(f, main_chunks[1], app),
         (0, 1) => MainRender::preferences(f, main_chunks[1], app),
@@ -121,7 +121,7 @@ impl MainRender {
             .highlight_style(Style::default().bg(Color::DarkGray));
         f.render_widget(table, area);
     }
-    fn preferences(f: &mut Frame, area: Rect, app: &App) {
+    fn preferences(f: &mut Frame, area: Rect, _app: &App) {
         let items: Vec<ListItem> = vec![
             ListItem::new(""),
             ListItem::new("Preference 2: ..."),

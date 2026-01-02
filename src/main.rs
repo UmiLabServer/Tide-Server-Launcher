@@ -42,6 +42,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<()> {
         terminal.draw(|f| ui::ui(f, &app))?;
 
         if let Event::Key(key) = event::read()? {
+            std::fs::write("debug.log", format!("{}, {}", app.locate[0], app.locate[1]))?;
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Down => app.next(),
