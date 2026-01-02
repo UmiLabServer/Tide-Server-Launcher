@@ -48,11 +48,10 @@ impl ServerStatus {
 
 pub struct App {
     pub servers: Vec<ServerConfig>,
-    pub selected_item: usize,
     pub tick_count: usize,
-    pub current_item: usize,
     pub locate: [usize; 2],
-    pub locate_depth: usize,
+    pub item: [usize; 2],
+    pub depth: usize,
     pub menu: Vec<&'static str>,
     pub selected_server_name: String,
 }
@@ -62,11 +61,10 @@ impl App {
         let servers = Self::load_config().unwrap_or_else(|_| vec![]);
         Self {
             servers,
-            selected_item: 0,
             tick_count: 0,
-            current_item: 0,
             locate: [0, 0],
-            locate_depth: 0,
+            item: [0, 0],
+            depth: 0,
             menu: vec!["Servers", "Preference"],
             selected_server_name: String::new(),
         }
@@ -90,46 +88,47 @@ impl App {
     }
 
     pub fn next(&mut self) {
-        if !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
-            self.selected_item = (self.selected_item + 1) % self.servers.len();
+        if !self.servers.is_empty() && self.locate[self.depth] == 0 {
+            self.item[self.depth] = (self.item[self.depth] + 1) % self.servers.len();
         }
     }
 
     pub fn previous(&mut self) {
-        if !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
-            if self.selected_item == 0 {
-                self.selected_item = self.servers.len() - 1;
+        if !self.servers.is_empty() && self.locate[self.depth] == 0 {
+            if self.item[self.depth] == 0 {
+                self.item[self.depth] = self.servers.len() - 1;
             } else {
-                self.selected_item -= 1;
+                self.item[self.depth] -= 1;
             }
         }
     }
 
     pub fn next_menu(&mut self) {
-        self.current_item = (self.current_item + 1) % self.menu.len();
-        self.selected_item = 0;
+        self.locate[self.depth] = (self.locate[self.depth] + 1) % self.menu.len();
+        self.item[self.depth] = 0;
     }
 
     pub fn previous_menu(&mut self) {
-        if self.current_item == 0 {
-            self.current_item = self.menu.len() - 1;
+        if self.locate[self.depth] == 0 {
+            self.locate[self.depth] = self.menu.len() - 1;
         } else {
-            self.current_item -= 1;
+            self.locate[self.depth] -= 1;
         }
-        self.selected_item = 0
+        self.item[self.depth] = 0
     }
 
     pub fn forward(&mut self) {
-        if self.current_item == 0 && !self.servers.is_empty() && self.locate[self.locate_depth] == 0 {
-            self.selected_server_name = self.servers[self.selected_item].name.to_string();
+        if self.locate[self.depth] == 0 && !self.servers.is_empty() && self.locate[self.depth] == 0 {
+            self.selected_server_name = self.servers[self.locate[self.depth]].name.to_string();
             let _ = self.save_config();
-            self.locate[self.locate_depth] = 1;
+            self.depth = 1;
+            self.locate[self.depth] = 0;
             self.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
         }
     }
     pub fn back(&mut self) {
-        if self.locate[self.locate_depth] == 1 {
-            self.locate[self.locate_depth] = 0;
+        if self.depth == 1 {
+            self.depth = 0;
             self.menu = vec!["Servers", "Preference"];
         }
     }
@@ -146,8 +145,8 @@ impl App {
     pub fn remove_server(&mut self, index: usize) {
         if index < self.servers.len() {
             self.servers.remove(index);
-            if self.selected_item >= self.servers.len() && !self.servers.is_empty() {
-                self.selected_item = self.servers.len() - 1;
+            if self.locate[self.depth] >= self.servers.len() && !self.servers.is_empty() {
+                self.locate[self.depth] = self.servers.len() - 1;
             }
             let _ = self.save_config();
         }

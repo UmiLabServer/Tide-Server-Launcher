@@ -33,16 +33,14 @@ fn main() -> Result<()> {
     if let Err(err) = res {
         println!("{err:?}");
     }
-
+    
     Ok(())
 }
-
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<()> {
     loop {
         terminal.draw(|f| ui::ui(f, &app))?;
-
+        std::fs::write("debug.log", format!("locate:[{}, {}]\nitem: [{}, {}]\ndepth: {}", app.locate[0], app.locate[1], app.item[0], app.item[1], app.depth))?;
         if let Event::Key(key) = event::read()? {
-            std::fs::write("debug.log", format!("{}, {}", app.locate[0], app.locate[1]))?;
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Down => app.next(),

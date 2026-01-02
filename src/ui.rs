@@ -32,7 +32,7 @@ pub fn ui(f: &mut Frame, app: &App) {
     let menu_items: Vec<Line> = app.menu.iter().map(|t| Line::from(*t)).collect();
     let menu = Tabs::new(menu_items)
         .block(Block::default().borders(Borders::ALL).title("Menu"))
-        .select(app.current_item)
+        .select(app.locate[app.depth])
         .style(Style::default().fg(Color::White))
         .highlight_style(
             Style::default()
@@ -47,8 +47,8 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     f.render_widget(menu, main_chunks[0]);
 
-    match (app.locate[app.locate_depth], app.current_item) {
-        // menu wo sewigyo
+    match (app.depth, app.locate[app.depth]) {
+        // menu wo 登録？
         (0, 0) => MainRender::servers(f, main_chunks[1], app),
         (0, 1) => MainRender::preferences(f, main_chunks[1], app),
         (1, 0) => EditRender::logs(f, main_chunks[1], app),
@@ -82,7 +82,7 @@ impl MainRender {
             .iter()
             .enumerate()
             .map(|(i, server)| {
-                let style = if i == app.selected_item {
+                let style = if i == app.item[app.depth] {
                     Style::default().bg(Color::DarkGray).fg(Color::White)
                 } else {
                     Style::default()
