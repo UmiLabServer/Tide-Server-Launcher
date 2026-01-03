@@ -50,7 +50,7 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     match (app.depth, app.locate[app.depth]) {
         // menu wo 登録？
-        (0, 0) => MainRender::items(f, main_chunks[1], app.clone()),
+        (0, 0) => MainRender::servers(f, main_chunks[1], app.clone()),
         (0, 1) => MainRender::preferences(f, main_chunks[1], app),
         (1, 0) => EditRender::logs(f, main_chunks[1], app),
         (1, 1) => EditRender::mods(f, main_chunks[1], app),
@@ -72,7 +72,7 @@ struct MainRender;
 struct EditRender;
 
 impl MainRender {
-    fn items(f: &mut Frame, area: Rect, app: App) {
+    fn servers(f: &mut Frame, area: Rect, app: App) {
         let header = Row::new(vec!["Name", "Host", "Port", "Status"])
             .style(Style::default().fg(Color::Yellow))
             .height(1)
