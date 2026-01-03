@@ -39,16 +39,51 @@ fn main() -> Result<()> {
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<()> {
     loop {
         terminal.draw(|f| ui::ui(f, &app))?;
+        // debug
         std::fs::write("debug.log", format!("locate:[{}, {}]\nitem: [{}, {}]\ndepth: {}", app.locate[0], app.locate[1], app.item[0], app.item[1], app.depth))?;
+
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Down => app.next(),
-                KeyCode::Up => app.previous(),
-                KeyCode::Enter => app.forward(),
-                KeyCode::Esc => app.back(),
-                KeyCode::Right => app.next_menu(),
-                KeyCode::Left => app.previous_menu(),
+                KeyCode::Down => {
+                    if !app.items.is_empty() && app.locate[app.depth] == 0 {
+                        app.item[app.depth] = (app.item[app.depth] + 1) % app.items.len();
+                    }
+                }
+                KeyCode::Up => {
+                    if !app.items.is_empty() && app.locate[app.depth] == 0 {
+                        if app.item[app.depth] == 0 {
+                            app.item[app.depth] = app.items.len() - 1;
+                        } else {
+                            app.item[app.depth] -= 1;
+                        }
+                    }
+                }
+                KeyCode::Enter => {
+                    if app.locate[app.depth] == 0 && !app.items.is_empty() && app.locate[app.depth] == 0 {
+                        app.selected_server_name = app.items[app.item[app.depth]].name.to_string();
+                        let _ = app.save_config();
+                        app.depth = 1;
+                        app.locate[app.depth] = 0;
+                    }
+                }
+                KeyCode::Esc => {
+                    if app.depth == 1 {
+                        app.depth = 0;
+                    }
+                }
+                KeyCode::Right => {
+                    app.locate[app.depth] = (app.locate[app.depth] + 1) % app.menu.len();
+                    app.item[app.depth] = 0;
+                }
+                KeyCode::Left => {
+                    if app.locate[app.depth] == 0 {
+                        app.locate[app.depth] = app.menu.len() - 1;
+                    } else {
+                        app.locate[app.depth] -= 1;
+                    }
+                    app.item[app.depth] = 0;
+                }
                 _ => {}
             }
         }

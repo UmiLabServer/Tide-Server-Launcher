@@ -1,7 +1,7 @@
 
-[servers]
+[items]
 
-[[servers.config]]
+[[items.config]]
 name = "Minecraft Server"
 host = "localhost"
 port = 25565
@@ -10,7 +10,7 @@ auto_start = false
 command = "java -Xmx2G -jar minecraft_server.jar nogui"
 working_dir = "/opt/minecraft"
 
-[[servers.config]]
+[[items.config]]
 name = "Web Server"
 host = "0.0.0.0"
 port = 8080
@@ -19,7 +19,7 @@ auto_start = true
 command = "python3 -m http.server 8080"
 working_dir = "/var/www/html"
 
-[[servers.config]]
+[[items.config]]
 name = "Database Server"
 host = "localhost"
 port = 5432
@@ -28,7 +28,7 @@ auto_start = true
 command = "postgres -D /var/lib/postgresql/data"
 working_dir = "/var/lib/postgresql"
 
-[[servers.config]]
+[[items.config]]
 name = "API Server"
 host = "localhost"
 port = 3000

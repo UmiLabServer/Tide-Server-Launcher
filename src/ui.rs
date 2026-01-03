@@ -1,7 +1,8 @@
 use crate::app::{App, ServerStatus};
+use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     prelude::*,
-    widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Tabs, Wrap},
+    widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Tabs},
 };
 
 pub fn ui(f: &mut Frame, app: &App) {
@@ -49,7 +50,7 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     match (app.depth, app.locate[app.depth]) {
         // menu wo 登録？
-        (0, 0) => MainRender::servers(f, main_chunks[1], app),
+        (0, 0) => MainRender::items(f, main_chunks[1], app.clone()),
         (0, 1) => MainRender::preferences(f, main_chunks[1], app),
         (1, 0) => EditRender::logs(f, main_chunks[1], app),
         (1, 1) => EditRender::mods(f, main_chunks[1], app),
@@ -71,14 +72,13 @@ struct MainRender;
 struct EditRender;
 
 impl MainRender {
-    fn servers(f: &mut Frame, area: Rect, app: &App) {
+    fn items(f: &mut Frame, area: Rect, app: App) {
         let header = Row::new(vec!["Name", "Host", "Port", "Status"])
             .style(Style::default().fg(Color::Yellow))
             .height(1)
             .bottom_margin(1);
-
         let rows: Vec<Row> = app
-            .servers
+            .items
             .iter()
             .enumerate()
             .map(|(i, server)| {
@@ -87,18 +87,11 @@ impl MainRender {
                 } else {
                     Style::default()
                 };
-                /*let status_style = match server.status {
-                    ServerStatus::Running => Style::default().fg(Color::Green),
-                    ServerStatus::Stopped => Style::default().fg(Color::Red),
-                    ServerStatus::Starting => Style::default().fg(Color::Yellow),
-                    ServerStatus::Error => Style::default().fg(Color::LightRed),
-                };*/
 
                 Row::new(vec![
                     Cell::from(server.name.as_str()),
                     Cell::from(server.host.as_str()),
                     Cell::from(server.port.to_string()),
-                    //Cell::from(server.status.as_str_animated(app.tick_count)).style(status_style),
                 ])
                 .style(style)
             })

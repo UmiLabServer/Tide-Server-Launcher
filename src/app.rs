@@ -46,8 +46,9 @@ impl ServerStatus {
     }
 }
 
+#[derive(Clone)]
 pub struct App {
-    pub servers: Vec<ServerConfig>,
+    pub items: Vec<ServerConfig>,
     pub tick_count: usize,
     pub locate: [usize; 2],
     pub item: [usize; 2],
@@ -58,9 +59,9 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let servers = Self::load_config().unwrap_or_else(|_| vec![]);
+        let items = Self::load_config().unwrap_or_else(|_| vec![]);
         Self {
-            servers,
+            items,
             tick_count: 0,
             locate: [0, 0],
             item: [0, 0],
@@ -73,7 +74,7 @@ impl App {
     const CONFIG_FILE: &'static str = "servers.json";
 
     pub fn save_config(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let json = serde_json::to_string_pretty(&self.servers)?;
+        let json = serde_json::to_string_pretty(&self.items)?;
         fs::write(Self::CONFIG_FILE, json)?;
         Ok(())
     }
@@ -83,79 +84,7 @@ impl App {
             return Err("Config file does not exist".into());
         }
         let content = fs::read_to_string(Self::CONFIG_FILE)?;
-        let servers: Vec<ServerConfig> = serde_json::from_str(&content)?;
-        Ok(servers)
-    }
-
-    pub fn next(&mut self) {
-        if !self.servers.is_empty() && self.locate[self.depth] == 0 {
-            self.item[self.depth] = (self.item[self.depth] + 1) % self.servers.len();
-        }
-    }
-
-    pub fn previous(&mut self) {
-        if !self.servers.is_empty() && self.locate[self.depth] == 0 {
-            if self.item[self.depth] == 0 {
-                self.item[self.depth] = self.servers.len() - 1;
-            } else {
-                self.item[self.depth] -= 1;
-            }
-        }
-    }
-
-    pub fn next_menu(&mut self) {
-        self.locate[self.depth] = (self.locate[self.depth] + 1) % self.menu.len();
-        self.item[self.depth] = 0;
-    }
-
-    pub fn previous_menu(&mut self) {
-        if self.locate[self.depth] == 0 {
-            self.locate[self.depth] = self.menu.len() - 1;
-        } else {
-            self.locate[self.depth] -= 1;
-        }
-        self.item[self.depth] = 0
-    }
-
-    pub fn forward(&mut self) {
-        if self.locate[self.depth] == 0 && !self.servers.is_empty() && self.locate[self.depth] == 0 {
-            self.selected_server_name = self.servers[self.locate[self.depth]].name.to_string();
-            let _ = self.save_config();
-            self.depth = 1;
-            self.locate[self.depth] = 0;
-            self.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
-        }
-    }
-    pub fn back(&mut self) {
-        if self.depth == 1 {
-            self.depth = 0;
-            self.menu = vec!["Servers", "Preference"];
-        }
-    }
-
-    pub fn tick(&mut self) {
-        self.tick_count = self.tick_count.wrapping_add(1);
-    }
-
-    pub fn add_server(&mut self, config: ServerConfig) {
-        self.servers.push(config);
-        let _ = self.save_config();
-    }
-
-    pub fn remove_server(&mut self, index: usize) {
-        if index < self.servers.len() {
-            self.servers.remove(index);
-            if self.locate[self.depth] >= self.servers.len() && !self.servers.is_empty() {
-                self.locate[self.depth] = self.servers.len() - 1;
-            }
-            let _ = self.save_config();
-        }
-    }
-
-    pub fn update_server(&mut self, index: usize, config: ServerConfig) {
-        if index < self.servers.len() {
-            self.servers[index] = config;
-            let _ = self.save_config();
-        }
+        let items: Vec<ServerConfig> = serde_json::from_str(&content)?;
+        Ok(items)
     }
 }
