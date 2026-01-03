@@ -49,7 +49,7 @@ impl ServerStatus {
 #[derive(Clone)]
 pub struct App {
     pub items: Vec<ServerConfig>,
-    pub tick_count: usize,
+    //pub tick_count: usize,
     pub locate: [usize; 2],
     pub item: [usize; 2],
     pub depth: usize,
@@ -62,7 +62,7 @@ impl App {
         let items = Self::load_config().unwrap_or_else(|_| vec![]);
         Self {
             items,
-            tick_count: 0,
+            //tick_count: 0,
             locate: [0, 0],
             item: [0, 0],
             depth: 0,
