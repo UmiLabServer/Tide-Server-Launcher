@@ -1,4 +1,4 @@
-use crate::app::{App, ServerStatus};
+use crate::app::{self, App, ServerStatus};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     prelude::*,
@@ -131,6 +131,9 @@ impl MainRender {
 }
 
 impl EditRender {
+    fn editrender(app: &App) {
+        
+    }
     fn logs(f: &mut Frame, area: Rect, app: &App) {
         let items: Vec<ListItem> = vec![
             ListItem::new(""),
