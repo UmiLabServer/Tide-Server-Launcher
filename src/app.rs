@@ -18,7 +18,7 @@ pub enum ServerStatus {
 }
 
 impl ServerStatus {
-    pub fn as_str(&self) -> &'static str {
+    /*pub fn as_str(&self) -> &'static str {
         match self {
             ServerStatus::Running => "Running",
             ServerStatus::Stopped => "Stopped",
@@ -43,7 +43,7 @@ impl ServerStatus {
             }
             ServerStatus::Error => "Error".to_string(),
         }
-    }
+    }*/
 }
 
 #[derive(Clone)]

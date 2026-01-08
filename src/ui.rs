@@ -131,10 +131,11 @@ impl MainRender {
 }
 
 impl EditRender {
-    fn editrender(app: &App) {
-        
+    fn editrender() {
+        App::menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
     }
     fn logs(f: &mut Frame, area: Rect, app: &App) {
+        EditRender::editrender();
         let items: Vec<ListItem> = vec![
             ListItem::new(""),
             ListItem::new("Preference 2: ..."),
