@@ -38,10 +38,13 @@ fn main() -> Result<()> {
 }
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     loop {
+        // 最初に現在の状態を描画
         terminal.draw(|f| ui::ui(f, app))?;
+        
         // debug
         std::fs::write("debug.log", format!("locate:[{}, {}]\nitem: [{}, {}]\ndepth: {}", app.locate[0], app.locate[1], app.item[0], app.item[1], app.depth))?;
-
+        
+        // キー入力を処理
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),

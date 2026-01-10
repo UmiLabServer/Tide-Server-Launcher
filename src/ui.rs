@@ -30,6 +30,13 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         );
     f.render_widget(title, chunks[0]);
 
+    // ここは描画前らしい
+    if app.depth == 0 {
+        app.menu = vec!["Servers", "Preference"]
+    } else if app.depth == 1 {
+        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
+    }
+
     let menu_items: Vec<Line> = app.menu.iter().map(|t| Line::from(*t)).collect();
     let menu = Tabs::new(menu_items)
         .block(Block::default().borders(Borders::ALL).title("Menu"))
@@ -48,11 +55,6 @@ pub fn ui(f: &mut Frame, app: &mut App) {
 
     f.render_widget(menu, main_chunks[0]);
 
-    if app.depth == 0 {
-        app.menu = vec!["Servers", "Preference"]
-    } else if app.depth == 1 {
-        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
-    }
     match (app.depth, app.locate[app.depth]) {
         // menu wo 登録？
         (0, 0) => MainRender::servers(f, main_chunks[1], app.clone()),
