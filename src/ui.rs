@@ -5,7 +5,7 @@ use ratatui::{
     widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Tabs},
 };
 
-pub fn ui(f: &mut Frame, app: &App) {
+pub fn ui(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -131,11 +131,11 @@ impl MainRender {
 }
 
 impl EditRender {
-    fn editrender() {
-        App::menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
+    fn editrender(app: &mut App) {
+        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
     }
-    fn logs(f: &mut Frame, area: Rect, app: &App) {
-        EditRender::editrender();
+    fn logs(f: &mut Frame, area: Rect, app: &mut App) {
+        EditRender::editrender(app);
         let items: Vec<ListItem> = vec![
             ListItem::new(""),
             ListItem::new("Preference 2: ..."),

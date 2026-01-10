@@ -19,8 +19,8 @@ fn main() -> Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = App::new();
-    let res = run_app(&mut terminal, app);
+    let mut app = App::new();
+    let res = run_app(&mut terminal, &mut app);
 
     disable_raw_mode()?;
     execute!(
@@ -36,9 +36,9 @@ fn main() -> Result<()> {
     
     Ok(())
 }
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     loop {
-        terminal.draw(|f| ui::ui(f, &app))?;
+        terminal.draw(|f| ui::ui(f, app))?;
         // debug
         std::fs::write("debug.log", format!("locate:[{}, {}]\nitem: [{}, {}]\ndepth: {}", app.locate[0], app.locate[1], app.item[0], app.item[1], app.depth))?;
 
