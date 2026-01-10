@@ -66,7 +66,7 @@ impl App {
             locate: [0, 0],
             item: [0, 0],
             depth: 0,
-            menu: vec!["Servers", "Preference"],
+            menu: vec![],
             selected_server_name: String::new(),
         }
     }

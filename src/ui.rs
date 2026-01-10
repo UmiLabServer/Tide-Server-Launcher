@@ -48,6 +48,11 @@ pub fn ui(f: &mut Frame, app: &mut App) {
 
     f.render_widget(menu, main_chunks[0]);
 
+    if app.depth == 0 {
+        app.menu = vec!["Servers", "Preference"]
+    } else if app.depth == 1 {
+        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
+    }
     match (app.depth, app.locate[app.depth]) {
         // menu wo 登録？
         (0, 0) => MainRender::servers(f, main_chunks[1], app.clone()),
@@ -131,11 +136,7 @@ impl MainRender {
 }
 
 impl EditRender {
-    fn editrender(app: &mut App) {
-        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
-    }
     fn logs(f: &mut Frame, area: Rect, app: &mut App) {
-        EditRender::editrender(app);
         let items: Vec<ListItem> = vec![
             ListItem::new(""),
             ListItem::new("Preference 2: ..."),
