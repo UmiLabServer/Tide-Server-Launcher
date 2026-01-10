@@ -63,7 +63,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> 
                     }
                 }
                 KeyCode::Enter => {
-                    if app.locate[app.depth] == 0 && !app.items.is_empty() && app.locate[app.depth] == 0 {
+                    if app.depth == 0 && !app.items.is_empty() && app.locate[app.depth] == 0 {
                         app.selected_server_name = app.items[app.item[app.depth]].name.to_string();
                         let _ = app.save_config();
                         app.depth = 1;
