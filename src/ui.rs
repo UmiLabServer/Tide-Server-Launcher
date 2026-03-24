@@ -1,5 +1,4 @@
-use crate::app::{self, App, ServerStatus};
-use crossterm::event::{KeyCode, KeyEvent};
+use crate::app::{App, AppMode, MainTab, DetailTab};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Tabs},
@@ -29,18 +28,10 @@ pub fn ui(f: &mut Frame, app: &mut App) {
                 .border_style(Style::default().fg(Color::White)),
         );
     f.render_widget(title, chunks[0]);
-
-    // ここは描画前らしい
-    if app.depth == 0 {
-        app.menu = vec!["Servers", "Preference"]
-    } else if app.depth == 1 {
-        app.menu = vec!["Logs", "Mods", "Config", "World", "Settings"];
-    }
-
-    let menu_items: Vec<Line> = app.menu.iter().map(|t| Line::from(*t)).collect();
-    let menu = Tabs::new(menu_items)
+    let menu_items = app.menu_items();
+    let menu = Tabs::new(menu_items.iter().map(|t| Line::from(*t)).collect::<Vec<Line>>())
         .block(Block::default().borders(Borders::ALL).title("Menu"))
-        .select(app.locate[app.depth])
+        .select(app.current_menu_index())
         .style(Style::default().fg(Color::White))
         .highlight_style(
             Style::default()
@@ -55,16 +46,18 @@ pub fn ui(f: &mut Frame, app: &mut App) {
 
     f.render_widget(menu, main_chunks[0]);
 
-    match (app.depth, app.locate[app.depth]) {
-        // menu wo 登録？
-        (0, 0) => MainRender::servers(f, main_chunks[1], app.clone()),
-        (0, 1) => MainRender::preferences(f, main_chunks[1], app),
-        (1, 0) => EditRender::logs(f, main_chunks[1], app),
-        (1, 1) => EditRender::mods(f, main_chunks[1], app),
-        (1, 2) => EditRender::config(f, main_chunks[1], app),
-        (1, 3) => EditRender::world(f, main_chunks[1], app),
-        (1, 4) => EditRender::settings(f, main_chunks[1], app),
-        _ => {}
+    match app.mode {
+        AppMode::List => match app.main_tab {
+            MainTab::Servers => MainRender::servers(f, main_chunks[1], app),
+            MainTab::Preference => MainRender::preferences(f, main_chunks[1], app),
+        },
+        AppMode::Detail => match app.detail_tab {
+            DetailTab::Logs => EditRender::logs(f, main_chunks[1], app),
+            DetailTab::Mods => EditRender::mods(f, main_chunks[1], app),
+            DetailTab::Config => EditRender::config(f, main_chunks[1], app),
+            DetailTab::World => EditRender::world(f, main_chunks[1], app),
+            DetailTab::Settings => EditRender::settings(f, main_chunks[1], app),
+        },
     }
 
     let help_text = "Press ↑↓ to move list, Press ←→ to move menu, Enter to edit Server, q to quit";
@@ -79,7 +72,7 @@ struct MainRender;
 struct EditRender;
 
 impl MainRender {
-    fn servers(f: &mut Frame, area: Rect, app: App) {
+    fn servers(f: &mut Frame, area: Rect, app: &App) {
         let header = Row::new(vec!["Name", "Host", "Port", "Status"])
             .style(Style::default().fg(Color::Yellow))
             .height(1)
@@ -89,7 +82,7 @@ impl MainRender {
             .iter()
             .enumerate()
             .map(|(i, server)| {
-                let style = if i == app.item[app.depth] {
+                let style = if i == app.selected_server_index {
                     Style::default().bg(Color::DarkGray).fg(Color::White)
                 } else {
                     Style::default()
