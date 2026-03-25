@@ -1,7 +1,7 @@
 use ratatui::{prelude::*, widgets::*};
 use tokio::sync::mpsc::UnboundedSender;
 
-use super::{server_list::ServerList, Component};
+use super::{server_list::ServerList, settings::Settings, Component};
 use crate::{action::Action, config::Config};
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -16,7 +16,9 @@ pub struct Home {
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
     server_list: ServerList,
+    settings: Settings,
     state: HomeState,
+    server_menu_state: usize,
     detail_menu_state: usize,
 }
 
@@ -24,6 +26,7 @@ impl Home {
     pub fn new() -> Self {
         Self {
             server_list: ServerList::new(),
+            settings: Settings::new(),
             detail_menu_state: 0,
             ..Default::default()
         }
@@ -34,12 +37,14 @@ impl Component for Home {
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> color_eyre::Result<()> {
         self.command_tx = Some(tx.clone());
         self.server_list.register_action_handler(tx.clone())?;
+        self.settings.register_action_handler(tx.clone())?;
         Ok(())
     }
 
     fn register_config_handler(&mut self, config: Config) -> color_eyre::Result<()> {
         self.config = config.clone();
-        self.server_list.register_config_handler(config)?;
+        self.server_list.register_config_handler(config.clone())?;
+        self.settings.register_config_handler(config)?;
         Ok(())
     }
 
@@ -55,8 +60,25 @@ impl Component for Home {
         }
         match self.state {
             HomeState::ServerMenu => match action {
-                Action::Up => self.server_list.row_up(),
-                Action::Down => self.server_list.row_down(),
+                Action::Up | Action::Down => match self.server_menu_state {
+                    0 => {
+                        if let Some(act) = self.server_list.update(action.clone())? {
+                            return Ok(Some(act));
+                        }
+                    }
+                    1 => {
+                        if let Some(act) = self.settings.update(action.clone())? {
+                            return Ok(Some(act));
+                        }
+                    }
+                    _ => {}
+                },
+                Action::Left => {
+                    self.server_menu_state = (self.server_menu_state + 1) % 2;
+                }
+                Action::Right => {
+                    self.server_menu_state = (self.server_menu_state + 1) % 2;
+                }
                 Action::Enter => {
                     if self.server_list.get_selected().is_some() {
                         self.state = HomeState::DetailMenu;
@@ -105,31 +127,41 @@ impl Component for Home {
         );
         match self.state {
             HomeState::ServerMenu => {
-                frame.render_widget(
-                    Paragraph::new(format!(
-                        "Selected: {}",
-                        self.server_list.get_selected().unwrap_or(&"None".into())
-                    ))
-                    .block(Block::new().borders(Borders::ALL)),
-                    menu[0],
-                );
-            }
-            HomeState::DetailMenu => {
-                let detail_menu_items = vec!["Logs", "Mods", "Config", "World", "Preferences"];
+                let detail_menu_items = vec!["Servers", "Settings"];
                 let tabs = Tabs::new(detail_menu_items)
-                    .block(Block::default().borders(Borders::ALL).title("Menu"))
-                    .select(self.detail_menu_state) // これでハイライト位置を指定
+                    .block(Block::default().borders(Borders::ALL))
+                    .select(self.server_menu_state)
                     .highlight_style(
                         Style::default()
                             .fg(Color::Yellow)
                             .add_modifier(Modifier::BOLD),
                     )
-                    .divider(Span::raw("|")); // 区切り文字
-
-                frame.render_widget(tabs, menu[0]); // 1つのボックス(menu[0])に描画
+                    .divider(Span::raw("|"));
+                frame.render_widget(tabs, menu[0]);
+                match self.server_menu_state {
+                    0 => {
+                        self.server_list.draw(frame, main[0])?;
+                    }
+                    1 => {
+                        self.settings.draw(frame, main[0])?;
+                    }
+                    _ => {}
+                }
+            }
+            HomeState::DetailMenu => {
+                let detail_menu_items = vec!["Logs", "Mods", "Config", "World", "Preferences"];
+                let tabs = Tabs::new(detail_menu_items)
+                    .block(Block::default().borders(Borders::ALL))
+                    .select(self.detail_menu_state)
+                    .highlight_style(
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                    .divider(Span::raw("|"));
+                frame.render_widget(tabs, menu[0]);
             }
         }
-        self.server_list.draw(frame, main[0])?;
         Ok(())
     }
 }
