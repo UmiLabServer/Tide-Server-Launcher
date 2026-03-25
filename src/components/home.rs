@@ -41,7 +41,22 @@ impl Component for Home {
     }
 
     fn draw(&mut self, frame: &mut Frame, area: Rect) -> color_eyre::Result<()> {
-        frame.render_widget(Paragraph::new("hello world"), area);
+        let vertical_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![Constraint::Length(6), Constraint::Min(10)])
+            .split(area);
+        let main_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![Constraint::Percentage(40), Constraint::Percentage(50)])
+            .split(vertical_chunks[0]);
+        frame.render_widget(
+            Paragraph::new("Top").block(Block::new().borders(Borders::ALL)),
+            main_chunks[0],
+        );
+        frame.render_widget(
+            Paragraph::new("Bottom").block(Block::new().borders(Borders::ALL)),
+            main_chunks[1],
+        );
         Ok(())
     }
 }

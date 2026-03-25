@@ -1,11 +1,11 @@
 use std::time::Instant;
 
 use ratatui::{
-    Frame,
     layout::{Constraint, Layout, Rect},
     style::{Style, Stylize},
     text::Span,
     widgets::Paragraph,
+    Frame,
 };
 
 use super::Component;
