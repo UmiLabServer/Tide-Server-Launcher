@@ -16,4 +16,6 @@ pub enum Action {
     Down,
     Left,
     Right,
+    Enter,
+    Esc,
 }

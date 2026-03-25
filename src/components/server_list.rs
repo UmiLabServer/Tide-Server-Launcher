@@ -23,8 +23,10 @@ impl ServerList {
             ..Default::default()
         }
     }
-
-    fn select_next(&mut self) {
+    pub fn get_selected(&self) -> Option<&String> {
+        self.state.selected().and_then(|i| self.items.get(i))
+    }
+    pub fn row_down(&mut self) {
         let i = match self.state.selected() {
             Some(i) => {
                 if i >= self.items.len() - 1 {
@@ -38,7 +40,7 @@ impl ServerList {
         self.state.select(Some(i));
     }
 
-    fn select_previous(&mut self) {
+    pub fn row_up(&mut self) {
         let i = match self.state.selected() {
             Some(i) => {
                 if i == 0 {
@@ -66,12 +68,10 @@ impl Component for ServerList {
 
     fn update(&mut self, action: Action) -> color_eyre::Result<Option<Action>> {
         match action {
-            Action::Up => self.select_previous(),
-            Action::Down => self.select_next(),
+            Action::Up => self.row_up(),
+            Action::Down => self.row_down(),
             Action::Left => {
-                // 左キーで「戻る（Homeへ）」アクションを発行する例
-                // Actionに `GoToHome` などを定義しておくと良い
-                return Ok(Some(Action::Help)); // 仮でHelpにしておく
+                return Ok(Some(Action::Help));
             }
             _ => {}
         }

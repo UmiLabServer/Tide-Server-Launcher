@@ -9,6 +9,8 @@
       "<down>": "Down",
       "<left>": "Left",
       "<right>": "Right",
+      "<enter>": "Enter",
+      "<esc>": "Esc",
     },
   }
 }
