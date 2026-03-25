@@ -6,7 +6,7 @@ use tracing::{debug, info};
 
 use crate::{
     action::Action,
-    components::{Component, fps::FpsCounter, home::Home},
+    components::{fps::FpsCounter, home::Home, Component},
     config::Config,
     tui::{Event, Tui},
 };
