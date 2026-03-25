@@ -41,21 +41,33 @@ impl Component for Home {
     }
 
     fn draw(&mut self, frame: &mut Frame, area: Rect) -> color_eyre::Result<()> {
-        let vertical_chunks = Layout::default()
+        let vertical = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Length(6), Constraint::Min(10)])
+            .constraints(vec![Constraint::Length(6), Constraint::Length(3),  Constraint::Min(10)])
             .split(area);
-        let main_chunks = Layout::default()
+        let header = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Constraint::Percentage(40), Constraint::Percentage(50)])
-            .split(vertical_chunks[0]);
+            .split(vertical[0]);
+        let menu = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .split(vertical[1]);
+        let main = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![Constraint::Percentage(60), Constraint::Percentage(40)])
+            .split(vertical[2]);
         frame.render_widget(
-            Paragraph::new("Top").block(Block::new().borders(Borders::ALL)),
-            main_chunks[0],
+            Paragraph::new("Header").block(Block::new().borders(Borders::ALL)),
+            header[0],
         );
         frame.render_widget(
-            Paragraph::new("Bottom").block(Block::new().borders(Borders::ALL)),
-            main_chunks[1],
+            Paragraph::new("Menu").block(Block::new().borders(Borders::ALL)),
+            menu[0],
+        );
+        frame.render_widget(
+            Paragraph::new("Main").block(Block::new().borders(Borders::ALL)),
+            main[0],
         );
         Ok(())
     }
